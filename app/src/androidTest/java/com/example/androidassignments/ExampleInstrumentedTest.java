@@ -1,5 +1,18 @@
 package com.example.androidassignments;
 
+
+
+import androidx.appcompat.widget.Toolbar;
+
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
+import static androidx.test.espresso.action.ViewActions.replaceText;
+import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
+
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.Context;
@@ -186,6 +199,118 @@ public class ExampleInstrumentedTest {
             });
         } finally {
             instrumentation.runOnMainSync(activity::finish);
+        }
+    }
+
+
+    @Test
+    public void toolbar_hasRequiredViewsAndMenuItems() {
+        Instrumentation instrumentation =
+                InstrumentationRegistry.getInstrumentation();
+
+        Intent intent = new Intent(
+                instrumentation.getTargetContext(),
+                TestToolbar.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        Activity activity =
+                instrumentation.startActivitySync(intent);
+
+        try {
+            instrumentation.runOnMainSync(() -> {
+                Toolbar toolbar =
+                        activity.findViewById(R.id.toolbar);
+
+                assertNotNull(toolbar);
+                assertNotNull(activity.findViewById(R.id.fab));
+
+                assertNotNull(
+                        toolbar.getMenu().findItem(R.id.choice1));
+                assertNotNull(
+                        toolbar.getMenu().findItem(R.id.choice2));
+                assertNotNull(
+                        toolbar.getMenu().findItem(R.id.choice3));
+                assertNotNull(
+                        toolbar.getMenu().findItem(R.id.about));
+            });
+        } finally {
+            instrumentation.runOnMainSync(activity::finish);
+        }
+    }
+
+    @Test
+    public void toolbar_choice1AndChoice3UpdateSnackbar() {
+        Instrumentation instrumentation =
+                InstrumentationRegistry.getInstrumentation();
+
+        Intent intent = new Intent(
+                instrumentation.getTargetContext(),
+                TestToolbar.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        Activity activity =
+                instrumentation.startActivitySync(intent);
+
+        try {
+            onView(withId(R.id.choice1)).perform(click());
+            onView(withText("You selected item 1"))
+                    .check(matches(isDisplayed()));
+
+            onView(withId(R.id.choice3)).perform(click());
+
+            onView(withId(R.id.edit_new_message))
+                    .perform(replaceText("Hello CP470"),
+                            closeSoftKeyboard());
+
+            onView(withText("OK")).perform(click());
+
+            onView(withId(R.id.choice1)).perform(click());
+
+            onView(withText("Hello CP470"))
+                    .check(matches(isDisplayed()));
+        } finally {
+            instrumentation.runOnMainSync(activity::finish);
+        }
+    }
+
+    @Test
+    public void toolbar_choice2NoAndYesWork() {
+        Instrumentation instrumentation =
+                InstrumentationRegistry.getInstrumentation();
+
+        Intent intent = new Intent(
+                instrumentation.getTargetContext(),
+                TestToolbar.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        Activity activity =
+                instrumentation.startActivitySync(intent);
+
+        try {
+            onView(withId(R.id.choice2)).perform(click());
+
+            onView(withText("Do you want to go back?"))
+                    .check(matches(isDisplayed()));
+
+            onView(withText("No")).perform(click());
+
+            onView(withId(R.id.toolbar))
+                    .check(matches(isDisplayed()));
+
+            onView(withId(R.id.choice2)).perform(click());
+            onView(withText("Yes")).perform(click());
+
+            instrumentation.waitForIdleSync();
+
+            assertTrue(activity.isFinishing()
+                    || activity.isDestroyed());
+        } finally {
+            instrumentation.runOnMainSync(() -> {
+                if (!activity.isFinishing()
+                        && !activity.isDestroyed()) {
+                    activity.finish();
+                }
+            });
         }
     }
 

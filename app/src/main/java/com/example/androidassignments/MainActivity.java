@@ -1,60 +1,84 @@
 package com.example.androidassignments;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.content.Intent;
+import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import android.util.Log;
-import android.content.Intent;
-import android.widget.Button;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
+
     private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "inside onCreate");
+
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+
+        ViewCompat.setOnApplyWindowInsetsListener(
+                findViewById(R.id.main), (v, insets) -> {
+                    Insets systemBars = insets.getInsets(
+                            WindowInsetsCompat.Type.systemBars());
+                    v.setPadding(systemBars.left, systemBars.top,
+                            systemBars.right, systemBars.bottom);
+                    return insets;
+                });
+
         Button button = findViewById(R.id.button);
         button.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, ListItemsActivity.class);
+            Intent intent = new Intent(
+                    MainActivity.this, ListItemsActivity.class);
             startActivityForResult(intent, 10);
         });
 
         Button startChatButton = findViewById(R.id.startChatButton);
         startChatButton.setOnClickListener(v -> {
             Log.i(TAG, "User clicked Start Chat");
-            Intent intent = new Intent(MainActivity.this, ChatWindow.class);
+            Intent intent = new Intent(
+                    MainActivity.this, ChatWindow.class);
             startActivity(intent);
         });
 
+        // Assignment 2 Part 4: Open TestToolbar
+        Button testToolbarButton =
+                findViewById(R.id.testToolbarButton);
+
+        testToolbarButton.setOnClickListener(v -> {
+            Intent intent = new Intent(
+                    MainActivity.this, TestToolbar.class);
+            startActivity(intent);
+        });
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(
+            int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == 10 && resultCode == RESULT_OK && data != null) {
-            String messagePassed = data.getStringExtra("Response");
+        if (requestCode == 10
+                && resultCode == RESULT_OK
+                && data != null) {
+
+            String messagePassed =
+                    data.getStringExtra("Response");
 
             if (messagePassed != null) {
                 Toast.makeText(
                         MainActivity.this,
-                        getString(R.string.activity_result_message, messagePassed),
+                        getString(
+                                R.string.activity_result_message,
+                                messagePassed),
                         Toast.LENGTH_LONG
                 ).show();
-
 
                 Log.i(TAG, "Received response: " + messagePassed);
             }
